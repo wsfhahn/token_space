@@ -38,28 +38,3 @@ def build_token_graph(client: OpenAI, model: str, depth: int, completions_per_no
             next_frontier.extend(curr_scope)
         frontier = next_frontier
     return root
-
-
-if __name__ == "__main__":
-    from src.viz_v2 import export_sigma_force_graph_html
-
-    client = OpenAI(
-        base_url="http://100.95.73.15:1234/v1",
-        api_key = "not-needed"
-    )
-    model = "qwen3-30b-2507"
-    depth = 3
-    completions_per_node = 3
-    max_retries = 20
-    base = "Once upon a time in a little town called"
-    use_wordseg = True
-
-    root = build_token_graph(client,
-                             model,
-                             depth,
-                             completions_per_node,
-                             max_retries,
-                             base,
-                             use_wordseg)
-    
-    export_sigma_force_graph_html(root, "test.html")
