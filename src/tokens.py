@@ -38,3 +38,37 @@ def build_token_graph(client: OpenAI, model: str, depth: int, completions_per_no
             next_frontier.extend(curr_scope)
         frontier = next_frontier
     return root
+
+
+def build_1d_graph(client: OpenAI, model: str, depth: int, base: str) -> TokenNode:
+    root = TokenNode(base)
+    nodes: list[TokenNode] = [root]
+
+    for _ in range(depth):
+        prev = nodes[-1]
+        try:
+            completion = client.completions.create(
+                model=model,
+                prompt=prev.token,
+                max_tokens=1
+            ).choices[0].text
+        except Exception as e:
+            raise Exception(f"Failed to get completion: {e}") from e
+        new = TokenNode(prev.token + completion)
+        prev.add_target(new)
+        nodes.append(new)
+    
+    return root
+
+
+def get_random_branch(root: TokenNode) -> list[TokenNode]: # type: ignore
+    out = [root]
+    current = root
+    targets = root.get_targets()
+    candidates = targets
+
+    while candidates:
+        
+
+
+def complete_from_random_node(client: OpenAI, model: str, depth: int)
