@@ -1,7 +1,7 @@
 from src import TokenNode, TokenNodeQueue
 from openai import OpenAI
 from wordsegment import load, segment
-
+from random import choice
 
 
 def build_token_graph(client: OpenAI, model: str, depth: int, completions_per_node: int, max_retries: int, base: str, use_wordseg: bool) -> TokenNode:
@@ -44,7 +44,7 @@ def build_1d_graph(client: OpenAI, model: str, depth: int, base: str) -> TokenNo
     root = TokenNode(base)
     nodes: list[TokenNode] = [root]
 
-    for _ in range(depth):
+    for _ in range(depth-1):
         prev = nodes[-1]
         try:
             completion = client.completions.create(
@@ -61,14 +61,40 @@ def build_1d_graph(client: OpenAI, model: str, depth: int, base: str) -> TokenNo
     return root
 
 
-def get_random_branch(root: TokenNode) -> list[TokenNode]: # type: ignore
-    out = [root]
-    current = root
-    targets = root.get_targets()
-    candidates = targets
+def dfs_get_size(root: TokenNode) -> int:
+    curr = root
+    queue = TokenNodeQueue([root])
+    i = 0
+    while queue.nodes:
+        curr = queue.pop_left()
+        queue.add_nodes(curr.get_targets())
+        i += 1
+    
+    return i
 
-    while candidates:
-        
+
+def rand_walk_and_branch(client: OpenAI)
 
 
-def complete_from_random_node(client: OpenAI, model: str, depth: int)
+# def complete_from_random_node(client: OpenAI, model: str, depth: int)
+
+
+if __name__ == "__main__":
+    from src.viz_v2 import export_sigma_force_graph_html
+    client = OpenAI(
+        base_url="http://100.95.73.15:1234/v1",
+        api_key="not-needed"
+    )
+    model = "llama-3.1-70b-base"
+    base = "There once was"
+    root = build_token_graph(
+        client,
+        model,
+        3,
+        2,
+        5,
+        base,
+        False
+    )
+    print(dfs_get_size(root))
+    export_sigma_force_graph_html(root, "tmp.html")
